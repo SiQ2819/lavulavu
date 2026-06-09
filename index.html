@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>얼굴펫</title>
+
+<style>
+body{
+    font-family: sans-serif;
+    text-align:center;
+    background:#f5f5f5;
+    padding:20px;
+}
+
+#pet{
+    width:220px;
+    margin:auto;
+}
+
+#face{
+    width:150px;
+    height:150px;
+    border-radius:50%;
+    object-fit:cover;
+    border:5px solid #333;
+    background:white;
+}
+
+.stats{
+    margin-top:20px;
+    font-size:20px;
+}
+
+button{
+    padding:12px 20px;
+    margin:5px;
+    font-size:18px;
+    border:none;
+    border-radius:10px;
+}
+
+.feed{
+    background:#ffcf5c;
+}
+
+.play{
+    background:#87ceeb;
+}
+
+.sleep{
+    background:#c9a0ff;
+}
+</style>
+</head>
+<body>
+
+<h1>🐣 얼굴펫</h1>
+
+<input type="file" id="upload">
+
+<br><br>
+
+<img id="face" src="">
+
+<br><br>
+
+<input id="nameInput" placeholder="이름 입력">
+
+<h2 id="petName">이름 없음</h2>
+
+<div class="stats">
+🍞 배고픔: <span id="hunger">100</span>
+</div>
+
+<h3 id="message">안녕 인간.</h3>
+
+<button class="feed" onclick="feedPet()">🍙 밥주기</button>
+<button class="play" onclick="playPet()">🎮 놀아주기</button>
+<button class="sleep" onclick="sleepPet()">😴 재우기</button>
+
+<script>
+let hunger = 100;
+
+const messages = [
+"배고파...",
+"심심해...",
+"냉장고 털고싶다",
+"숙제 하기 싫어",
+"타코야키 먹고싶어",
+"주인을 관찰중..."
+];
+
+document.getElementById("upload").addEventListener("change", e=>{
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(event){
+        document.getElementById("face").src = event.target.result;
+    };
+
+    reader.readAsDataURL(file);
+});
+
+document.getElementById("nameInput").addEventListener("input", e=>{
+    document.getElementById("petName").textContent = e.target.value || "이름 없음";
+});
+
+function update(){
+    document.getElementById("hunger").textContent = hunger;
+}
+
+function feedPet(){
+    hunger = Math.min(100, hunger + 20);
+    update();
+    document.getElementById("message").textContent =
+    "냠냠!!";
+}
+
+function playPet(){
+    hunger = Math.max(0, hunger - 10);
+    update();
+    document.getElementById("message").textContent =
+    "재밌다!!";
+}
+
+function sleepPet(){
+    document.getElementById("message").textContent =
+    "쿨쿨...";
+}
+
+setInterval(()=>{
+    hunger = Math.max(0, hunger - 1);
+    update();
+
+    if(Math.random() < 0.3){
+        document.getElementById("message").textContent =
+        messages[Math.floor(Math.random()*messages.length)];
+    }
+
+    if(hunger < 30){
+        document.getElementById("message").textContent =
+        "진짜 배고파!!!!";
+    }
+
+},5000);
+
+update();
+</script>
+
+</body>
+</html>
