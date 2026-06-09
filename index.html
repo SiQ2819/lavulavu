@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>숙제넘하기싫다</title>
+
+<style>
+body{
+    margin:0;
+    text-align:center;
+    font-family:sans-serif;
+    background:#f2f2f2;
+}
+
+h1{
+    margin:15px;
+}
+
+#world{
+    position:relative;
+    width:95vw;
+    height:65vh;
+    margin:auto;
+    border:4px solid black;
+    overflow:hidden;
+    background:white;
+}
+
+#pet{
+    position:absolute;
+    width:120px;
+    left:100px;
+    top:100px;
+    user-select:none;
+    touch-action:none;
+    display:none;
+}
+
+#msg{
+    font-size:20px;
+    margin:10px;
+    min-height:30px;
+}
+
+button{
+    padding:10px 16px;
+    font-size:18px;
+    margin:5px;
+}
+</style>
+</head>
+<body>
+
+<h1>🧬 숙제넘하기싫다</h1>
+
+<input type="file" id="upload">
+
+<div id="msg">생명체 생성 대기중...</div>
+
+<div id="world">
+    <img id="pet">
+</div>
+
+<div>
+    <button onclick="feed()">🍙 밥주기</button>
+</div>
+
+<script>
+
+const pet = document.getElementById("pet");
+const world = document.getElementById("world");
+const msg = document.getElementById("msg");
+
+let hunger = 100;
+
+let x = 100;
+let y = 100;
+
+let dx = 4;
+let dy = 3;
+
+let scale = 1;
+let rotation = 0;
+
+let sleeping = false;
+let escaped = false;
+
+function say(text){
+    msg.innerText = text;
+}
+
+document
+.getElementById("upload")
+.addEventListener("change", e=>{
+
+    const file = e.target.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = ev=>{
+        pet.src = ev.target.result;
+        pet.style.display="block";
+        say("생명체 생성 완료");
+    };
+
+    reader.readAsDataURL(file);
+});
+
+function updateTransform(){
+    pet.style.transform =
+    `scale(${scale}) rotate(${rotation}deg)`;
+}
+
+setInterval(()=>{
+
+    if(escaped) return;
+    if(sleeping) return;
+
+    let speedFactor =
+    Math.max(0.4,hunger/100);
+
+    x += dx * speedFactor;
+    y += dy * speedFactor;
+
+    if(x <= 0 ||
+       x >= world.clientWidth - pet.offsetWidth){
+
+        dx *= -1;
+
+        say("💥 벽에 박음");
+    }
+
+    if(y <= 0 ||
+       y >= world.clientHeight - pet.offsetHeight){
+
+        dy *= -1;
+
+        say("💥 천장/바닥 충돌");
+    }
+
+    pet.style.left = x + "px";
+    pet.style.top = y + "px";
+
+},16);
+
+setInterval(()=>{
+
+    if(escaped) return;
+
+    hunger--;
+
+    if(hunger < 0)
+        hunger = 0;
+
+    if(hunger < 25){
+
+        say("😫 배고파 죽겠다...");
+    }
+
+},3000);
+
+function feed(){
+
+    if(escaped) return;
+
+    hunger += 25;
+
+    if(hunger > 100)
+        hunger = 100;
+
+    say("🍙 냠냠냠");
+}
+
+const actions = [
+
+"🧍 멍때리는 중",
+"🧠 존재에 대해 고민중",
+"🧊 냉장고 습격 계획중",
+"📚 공부 회피중",
+"🛌 누워있는 중",
+"👀 주인 감시중",
+"🤨 반항심 생성중",
+"🐟 타코야키 생각중"
+
+];
+
+setInterval(()=>{
+
+    if(escaped) return;
+
+    let r = Math.floor(
+        Math.random()*actions.length
+    );
+
+    say(actions[r]);
+
+},5000);
+
+setInterval(()=>{
+
+    if(escaped) return;
+
+    let r = Math.random();
+
+    if(r < 0.15){
+
+        sleeping = true;
+
+        say("😴 쿨...");
+        
+        setTimeout(()=>{
+
+            sleeping = false;
+
+            say("😳 깼다");
+
+        },4000);
+    }
+
+},12000);
+
+setInterval(()=>{
+
+    if(escaped) return;
+
+    let r = Math.random();
+
+    if(r < 0.25){
+
+        scale =
+        0.7 + Math.random()*1.8;
+
+        updateTransform();
+
+        say("🧬 돌연변이 발생");
+    }
+
+    if(r > 0.7){
+
+        rotation += 90;
+
+        updateTransform();
+
+        say("🌪️ 회전 진화");
+    }
+
+},10000);
+
+setInterval(()=>{
+
+    if(escaped) return;
+
+    if(Math.random() < 0.03){
+
+        escaped = true;
+
+        pet.style.left = "-1000px";
+
+        say("🏃 생명체가 탈주했습니다");
+    }
+
+},15000);
+
+let dragging = false;
+
+pet.addEventListener("pointerdown",()=>{
+
+    dragging = true;
+
+    say("😡 잡지마");
+
+});
+
+window.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+    const rect =
+    world.getBoundingClientRect();
+
+    x = e.clientX - rect.left - 60;
+    y = e.clientY - rect.top - 60;
+
+    pet.style.left = x+"px";
+    pet.style.top = y+"px";
+});
+
+window.addEventListener("pointerup",()=>{
+
+    if(dragging){
+
+        say("😵 던져짐");
+
+    }
+
+    dragging = false;
+});
+
+updateTransform();
+
+</script>
+
+</body>
+</html>
